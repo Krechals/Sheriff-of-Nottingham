@@ -1,9 +1,11 @@
 package main;
 
 import engine.Player;
+import engine.ScoreBoard;
 import goods.Goods;
 import strategy.StrategyList;
 
+import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,17 +39,25 @@ public final class Main {
         for (int round = 0; round < gameInput.getRounds(); ++round) {
             for (int subRound = 0; subRound < nrPlayers; ++subRound) {
                 players.get(subRound).sherifOn();
+                int sheriffID = subRound;
                 for (Player p : players) {
                     if (p.getID() != subRound) {
-                        playerDeck = gameInput.getAssetIds().subList(cardIndex, cardIndex + 9);
-                        System.out.println(playerDeck);
+                        // Cards drawn form the deck
+                        playerDeck = gameInput.getAssetIds().subList(cardIndex, cardIndex + 10);
+                        // Cards chose by a player
                         p.setCards(playerDeck);
                         cardIndex += 10;
+                        // Searching process
+                        players.get(sheriffID).playerSearch(p);
                         List<Goods> test = players.get(0).getAssets();
-                        System.out.println(p.getStrategy());
                     }
                 }
+                players.get(subRound).sherifOff();
             }
         }
+        ScoreBoard.updateFinalScores(players);
+        ScoreBoard.finalBouns(players);
+        ScoreBoard.printScoreBoard(players);
+
     }
 }
