@@ -35,8 +35,8 @@ public class Player {
     public Strategy getStrategy() {
         return gameAproach;
     }
-    public void setCards(List<Integer> cardIDs) {
-        assets = gameAproach.createBag(cardIDs);
+    public void setCards(List<Integer> cardIDs, int roundID) {
+        assets = gameAproach.createBag(cardIDs, roundID);
         assetDeclared = gameAproach.declareAsset(assets);
         assetCount = assets.size();
     }
@@ -74,7 +74,14 @@ public class Player {
         if (p.getStrategy() instanceof Basic) {
             int searchScore = gameAproach.searchBasic(p);
             score += searchScore;
-
+        }
+        if (p.getStrategy() instanceof Greedy) {
+            int searchScore = gameAproach.searchBasic(p);
+            score += searchScore;
+        }
+        if (p.getStrategy() instanceof Bribe) {
+            int searchScore = gameAproach.searchBasic(p);
+            score += searchScore;
         }
     }
     public void finalScore() {

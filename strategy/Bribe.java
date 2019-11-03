@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Bribe implements Strategy {
-    public List<Goods> createBag(List<Integer> cardIDs) {
+    public List<Goods> createBag(List<Integer> cardIDs, int roundID) {
         List<Goods> ans = new ArrayList<>();
         return ans;
     }
@@ -19,6 +19,6 @@ public class Bribe implements Strategy {
         return GoodsFactory.getInstance().getGoodsById(0);
     }
     public String printStrategy() {
-        return "BRIBE";
+        return "BRIBED";
     }
 }

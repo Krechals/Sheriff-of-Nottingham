@@ -36,7 +36,7 @@ public final class Main {
 
         List<Integer> playerDeck;
         int cardIndex = 0;
-        for (int round = 0; round < gameInput.getRounds(); ++round) {
+        for (int round = 1; round <= gameInput.getRounds(); ++round) {
             for (int subRound = 0; subRound < nrPlayers; ++subRound) {
                 players.get(subRound).sherifOn();
                 int sheriffID = subRound;
@@ -45,7 +45,7 @@ public final class Main {
                         // Cards drawn form the deck
                         playerDeck = gameInput.getAssetIds().subList(cardIndex, cardIndex + 10);
                         // Cards chose by a player
-                        p.setCards(playerDeck);
+                        p.setCards(playerDeck, round);
                         cardIndex += 10;
                         // Searching process
                         players.get(sheriffID).playerSearch(p);
@@ -53,8 +53,11 @@ public final class Main {
                     }
                 }
                 players.get(subRound).sherifOff();
+                // System.out.println(players.get(1).getAssets());
             }
+
         }
+
         ScoreBoard.updateFinalScores(players);
         ScoreBoard.finalBouns(players);
         ScoreBoard.printScoreBoard(players);

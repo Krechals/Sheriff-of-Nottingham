@@ -5,7 +5,7 @@ import engine.Player;
 import goods.Goods;
 
 public interface Strategy {
-    List<Goods> createBag(List<Integer> cardIDs);
+    List<Goods> createBag(List<Integer> cardIDs, int roundID);
     int searchBasic(Player p);
     Goods declareAsset(List<Goods> assets);
     String printStrategy();

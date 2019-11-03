@@ -14,7 +14,7 @@ import goods.GoodsType;
 
 public class Basic implements Strategy {
     @Override
-    public List<Goods> createBag(List<Integer> cardIDs) {
+    public List<Goods> createBag(List<Integer> cardIDs, int roundID) {
         List<Goods> ans = new ArrayList<>();
         List<CardDrawn> cardsDrawn = new ArrayList<>();
         GoodsFactory cardMap = GoodsFactory.getInstance();
@@ -59,25 +59,33 @@ public class Basic implements Strategy {
     // Returns penalty/earning after searching
     public int searchBasic(Player p) {
         int score = 0;
+        int scoreNegative = 0;
+        int scorePositive = 0;
         // List<Integer> deck = GameInput.getAssetIds();
         List<Goods> playerAssets = p.getAssets();
         List<Goods> playerAssetsBrought = p.getAssetsBrought();
         int assetIndex = 0;
         for (Goods asset : playerAssets) {
             if (asset.getType() == GoodsType.Illegal || asset.getId() != p.getAssetDeclared().getId()) {
-                score += asset.getPenalty();
+                scoreNegative += asset.getPenalty();
                 // Confiscation
-                playerAssets.remove(assetIndex);
+                // playerAssets.remove(assetIndex);
                 ++assetIndex;
-                break;
+                if (playerAssets.isEmpty()) {
+                    break;
+                }
                 // deck.add(assets.getId());
             } else {
-                score -= asset.getPenalty();
+                scorePositive += asset.getPenalty();
                 playerAssetsBrought.add(asset);
             }
         }
-        p.addScore(-score);
-        return score;
+        if (scoreNegative > 0) {
+            p.addScore(-scoreNegative);
+            return scoreNegative;
+        }
+        p.addScore(scorePositive);
+        return -scorePositive;
     }
     public String printStrategy() {
         return "BASIC";
