@@ -1,9 +1,9 @@
 package main;
 
+import fileio.FileSystem;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import fileio.FileSystem;
 
 public final class GameInputLoader {
     private final String mInputPath;

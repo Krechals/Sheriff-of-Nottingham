@@ -1,5 +1,6 @@
 package strategy;
 
+import common.Constants;
 import engine.BasicCardComparator;
 import engine.CardDrawn;
 import engine.Player;
@@ -14,12 +15,13 @@ import java.util.List;
 
 public class Greedy implements Strategy {
     @Override
-    public List<Goods> createBag(List<Integer> cardIDs, int roundID) {
+    public final List<Goods> createBag(final List<Integer> cardIDs, final int roundID,
+                                 final int score, final Player p) {
         List<Goods> ans = new ArrayList<>();
         List<CardDrawn> cardsDrawn = new ArrayList<>();
         GoodsFactory cardMap = GoodsFactory.getInstance();
         BasicCardComparator basicCardComparator = new BasicCardComparator();
-        int[] freq = new int[30];
+        int[] freq = new int[Constants.CARD_ID_RANGE];
         Arrays.fill(freq, 0);
         for (Integer cardID : cardIDs) {
             ++freq[cardID];
@@ -32,32 +34,36 @@ public class Greedy implements Strategy {
             }
         }
         Collections.sort(cardsDrawn, basicCardComparator);
-
         CardDrawn firstCard = cardsDrawn.get(0);
         int cardFreq = firstCard.getFreq();
         if (firstCard.getAsset().getType() == GoodsType.Legal) {
-            while (ans.size() < 8 && cardFreq > 0) {
+            while (ans.size() < Constants.MAX_GOODS_ALLOWED && cardFreq > 0) {
                 ans.add(firstCard.getAsset());
                 --cardFreq;
             }
         } else {
             ans.add(firstCard.getAsset());
+            --cardFreq;
         }
         // Greedy Strategy
         if (roundID % 2 == 0 && firstCard.getAsset().getType() == GoodsType.Legal) {
-            for (Integer card : cardIDs) {
-                Goods asset = GoodsFactory.getInstance().getGoodsById(card);
+            for (CardDrawn card : cardsDrawn) {
+                Goods asset = card.getAsset();
                 if (asset.getType() == GoodsType.Illegal) {
                     ans.add(asset);
                     break;
                 }
             }
         } else if (roundID % 2 == 0 && firstCard.getAsset().getType() == GoodsType.Illegal) {
-            ans.add(cardsDrawn.get(1).getAsset());
+            if (cardFreq > 0) {
+                ans.add(cardsDrawn.get(0).getAsset());
+            } else {
+                ans.add(cardsDrawn.get(1).getAsset());
+            }
         }
         return ans;
     }
-    public Goods declareAsset(List<Goods> assets) {
+    public final Goods declareAsset(final List<Goods> assets) {
         Goods ans;
         if (assets.get(0).getType() == GoodsType.Illegal) {
             // Declare apples
@@ -67,22 +73,35 @@ public class Greedy implements Strategy {
         }
         return ans;
     }
-    // TODO: case of searching greedy / bribe
+    public final void dontSearch(final Player p) {
+        List<Goods> playerAssets = p.getAssets();
+        List<Goods> playerAssetsBrought = p.getAssetsBrought();
+
+        for (Goods asset : playerAssets) {
+            playerAssetsBrought.add(asset);
+        }
+    }
     // Returns penalty/earning after searching
-    public int searchBasic(Player p) {
-        int score = 0;
+    public final int search(final Player p, final int sheriffID,
+                      final int playerNumber, final int sheriffScore) {
         int scorePositive = 0;
         int scoreNegative = 0;
         // List<Integer> deck = GameInput.getAssetIds();
         List<Goods> playerAssets = p.getAssets();
         List<Goods> playerAssetsBrought = p.getAssetsBrought();
-        int assetIndex = 0;
+
+        // Search a player unless he gives bribe
+        if (p.getBribe() > 0 || sheriffScore < Constants.BRIBE_MINIMUM_SCORE) {
+            p.addScore(-p.getBribe());
+            dontSearch(p);
+            return p.getBribe();
+        }
         for (Goods asset : playerAssets) {
-            if (asset.getType() == GoodsType.Illegal || asset.getId() != p.getAssetDeclared().getId()) {
+            if (asset.getType() == GoodsType.Illegal
+                    || asset.getId() != p.getAssetDeclared().getId()) {
                 scoreNegative += asset.getPenalty();
                 // Confiscation
                 // playerAssets.remove(assetIndex);
-                ++assetIndex;
                 if (playerAssets.isEmpty()) {
                     break;
                 }
@@ -99,7 +118,7 @@ public class Greedy implements Strategy {
         p.addScore(scorePositive);
         return -scorePositive;
     }
-    public String printStrategy() {
+    public final String printStrategy() {
         return "GREEDY";
     }
 }

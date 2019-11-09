@@ -1,9 +1,6 @@
 package strategy;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Arrays;
 
+import common.Constants;
 import engine.BasicCardComparator;
 import engine.CardDrawn;
 import engine.Player;
@@ -11,15 +8,21 @@ import goods.Goods;
 import goods.GoodsFactory;
 import goods.GoodsType;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 
 public class Basic implements Strategy {
     @Override
-    public List<Goods> createBag(List<Integer> cardIDs, int roundID) {
+    public final List<Goods> createBag(final List<Integer> cardIDs, final int roundID,
+                                 final int score, final Player p) {
         List<Goods> ans = new ArrayList<>();
         List<CardDrawn> cardsDrawn = new ArrayList<>();
         GoodsFactory cardMap = GoodsFactory.getInstance();
         BasicCardComparator basicCardComparator = new BasicCardComparator();
-        int[] freq = new int[30];
+        int[] freq = new int[Constants.CARD_ID_RANGE];
         Arrays.fill(freq, 0);
         for (Integer cardID : cardIDs) {
             ++freq[cardID];
@@ -36,7 +39,7 @@ public class Basic implements Strategy {
         CardDrawn firstCard = cardsDrawn.get(0);
         int cardFreq = firstCard.getFreq();
         if (firstCard.getAsset().getType() == GoodsType.Legal) {
-            while (ans.size() < 8 && cardFreq > 0) {
+            while (ans.size() < Constants.MAX_GOODS_ALLOWED && cardFreq > 0) {
                 ans.add(firstCard.getAsset());
                 --cardFreq;
             }
@@ -45,7 +48,7 @@ public class Basic implements Strategy {
         }
         return ans;
     }
-    public Goods declareAsset(List<Goods> assets) {
+    public final Goods declareAsset(final List<Goods> assets) {
         Goods ans;
         if (assets.get(0).getType() == GoodsType.Illegal) {
             // Declare apples
@@ -55,22 +58,33 @@ public class Basic implements Strategy {
         }
         return ans;
     }
-    // TODO: case of searching greedy / bribe
+    public final void dontSearch(final Player p) {
+        List<Goods> playerAssets = p.getAssets();
+        List<Goods> playerAssetsBrought = p.getAssetsBrought();
+
+        for (Goods asset : playerAssets) {
+            playerAssetsBrought.add(asset);
+        }
+    }
     // Returns penalty/earning after searching
-    public int searchBasic(Player p) {
-        int score = 0;
+    public final int search(final Player p, final int sheriffID,
+                      final int playerNumber, final int sheriffScore) {
         int scoreNegative = 0;
         int scorePositive = 0;
         // List<Integer> deck = GameInput.getAssetIds();
         List<Goods> playerAssets = p.getAssets();
         List<Goods> playerAssetsBrought = p.getAssetsBrought();
-        int assetIndex = 0;
+
+        if (sheriffScore < Constants.BRIBE_MINIMUM_SCORE) {
+            dontSearch(p);
+            return 0;
+        }
         for (Goods asset : playerAssets) {
-            if (asset.getType() == GoodsType.Illegal || asset.getId() != p.getAssetDeclared().getId()) {
+            if (asset.getType() == GoodsType.Illegal
+                    || asset.getId() != p.getAssetDeclared().getId()) {
                 scoreNegative += asset.getPenalty();
                 // Confiscation
                 // playerAssets.remove(assetIndex);
-                ++assetIndex;
                 if (playerAssets.isEmpty()) {
                     break;
                 }
@@ -87,7 +101,7 @@ public class Basic implements Strategy {
         p.addScore(scorePositive);
         return -scorePositive;
     }
-    public String printStrategy() {
+    public final String printStrategy() {
         return "BASIC";
     }
 }

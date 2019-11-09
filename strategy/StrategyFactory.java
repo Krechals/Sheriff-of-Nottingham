@@ -1,11 +1,11 @@
 package strategy;
 
-public class StrategyFactory {
+public final class StrategyFactory {
     public static final StrategyFactory INSTANCE = new StrategyFactory();
 
     private StrategyFactory() { }
 
-    public Strategy createStrategy(StrategyList strategy) {
+    public Strategy createStrategy(final StrategyList strategy) {
         if (strategy == StrategyList.BASIC) {
             return new Basic();
         } else if (strategy == StrategyList.GREEDY) {

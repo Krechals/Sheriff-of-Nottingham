@@ -1,11 +1,10 @@
 package main;
 
+import common.Constants;
 import engine.Player;
 import engine.ScoreBoard;
-import goods.Goods;
 import strategy.StrategyList;
 
-import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,30 +36,27 @@ public final class Main {
         List<Integer> playerDeck;
         int cardIndex = 0;
         for (int round = 1; round <= gameInput.getRounds(); ++round) {
-            for (int subRound = 0; subRound < nrPlayers; ++subRound) {
-                players.get(subRound).sherifOn();
-                int sheriffID = subRound;
+            for (int sheriffID = 0; sheriffID < nrPlayers; ++sheriffID) {
+                Player sheriff = players.get(sheriffID);
+                sheriff.setRoundScore(0);
                 for (Player p : players) {
-                    if (p.getID() != subRound) {
+                    if (p.getID() != sheriffID) {
                         // Cards drawn form the deck
-                        playerDeck = gameInput.getAssetIds().subList(cardIndex, cardIndex + 10);
+                        playerDeck = gameInput.getAssetIds().subList(cardIndex,
+                                                        cardIndex + Constants.CARDS_DRAWN);
                         // Cards chose by a player
                         p.setCards(playerDeck, round);
-                        cardIndex += 10;
+                        cardIndex += Constants.CARDS_DRAWN;
                         // Searching process
-                        players.get(sheriffID).playerSearch(p);
-                        List<Goods> test = players.get(0).getAssets();
+                        sheriff.playerSearch(p, players.size());
                     }
                 }
-                players.get(subRound).sherifOff();
-                // System.out.println(players.get(1).getAssets());
+                sheriff.addScore(sheriff.getRoundScore());
             }
 
         }
-
         ScoreBoard.updateFinalScores(players);
         ScoreBoard.finalBouns(players);
         ScoreBoard.printScoreBoard(players);
-
     }
 }
