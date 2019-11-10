@@ -12,15 +12,16 @@ public final class ScoreBoard {
     private ScoreBoard() {
         // NOT CALLED
     }
+
     public static void updateFinalScores(final List<Player> players) {
         for (Player p : players) {
             p.finalScore();
         }
     }
 
+    // Get King + Queen Bonus for each player
     public static void finalBouns(final List<Player> players) {
 
-        // 0-9 -> number of all legal goods
         for (int goodID = 0; goodID <= Constants.LEGAL_CARDS_ID_FINISH; ++goodID) {
             int kingID = 0;
             int kingGoodSize = 0;
@@ -52,7 +53,7 @@ public final class ScoreBoard {
             }
         }
     }
-
+    // Print ScoreBoard given all players at the table
     public static void printScoreBoard(final List<Player> players) {
         PlayerComparator playerComparator = new PlayerComparator();
         Collections.sort(players, playerComparator);

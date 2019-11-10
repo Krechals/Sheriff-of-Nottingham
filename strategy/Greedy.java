@@ -15,14 +15,15 @@ import java.util.List;
 
 public class Greedy implements Strategy {
     @Override
-    public final List<Goods> createBag(final List<Integer> cardIDs, final int roundID,
-                                 final int score, final Player p) {
+    public final List<Goods> createBag(final List<Integer> cardIDs,
+                                       final int roundID, final Player p) {
         List<Goods> ans = new ArrayList<>();
         List<CardDrawn> cardsDrawn = new ArrayList<>();
         GoodsFactory cardMap = GoodsFactory.getInstance();
         BasicCardComparator basicCardComparator = new BasicCardComparator();
         int[] freq = new int[Constants.CARD_ID_RANGE];
         Arrays.fill(freq, 0);
+        // Get frequency of cards
         for (Integer cardID : cardIDs) {
             ++freq[cardID];
         }
@@ -33,6 +34,7 @@ public class Greedy implements Strategy {
                 freq[cardID] = 0;
             }
         }
+        // Part of Basic Strategy
         Collections.sort(cardsDrawn, basicCardComparator);
         CardDrawn firstCard = cardsDrawn.get(0);
         int cardFreq = firstCard.getFreq();
@@ -45,7 +47,7 @@ public class Greedy implements Strategy {
             ans.add(firstCard.getAsset());
             --cardFreq;
         }
-        // Greedy Strategy
+        // Greedy Strategy on odd rounds
         if (roundID % 2 == 0 && firstCard.getAsset().getType() == GoodsType.Legal) {
             for (CardDrawn card : cardsDrawn) {
                 Goods asset = card.getAsset();
@@ -86,7 +88,6 @@ public class Greedy implements Strategy {
                       final int playerNumber, final int sheriffScore) {
         int scorePositive = 0;
         int scoreNegative = 0;
-        // List<Integer> deck = GameInput.getAssetIds();
         List<Goods> playerAssets = p.getAssets();
         List<Goods> playerAssetsBrought = p.getAssetsBrought();
 
@@ -100,12 +101,9 @@ public class Greedy implements Strategy {
             if (asset.getType() == GoodsType.Illegal
                     || asset.getId() != p.getAssetDeclared().getId()) {
                 scoreNegative += asset.getPenalty();
-                // Confiscation
-                // playerAssets.remove(assetIndex);
                 if (playerAssets.isEmpty()) {
                     break;
                 }
-                // deck.add(assets.getId());
             } else {
                 scorePositive += asset.getPenalty();
                 playerAssetsBrought.add(asset);

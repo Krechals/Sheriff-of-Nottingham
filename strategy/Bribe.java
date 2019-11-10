@@ -15,8 +15,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class Bribe implements Strategy {
-    public final List<Goods> createBag(final List<Integer> cardIDs, final int roundID,
-                                 final int score, final Player p) {
+    public final List<Goods> createBag(final List<Integer> cardIDs,
+                                       final int roundID, final Player p) {
         List<Goods> ans = new ArrayList<>();
         List<CardDrawn> cardsDrawn = new ArrayList<>();
         GoodsFactory cardMap = GoodsFactory.getInstance();
@@ -24,6 +24,8 @@ public class Bribe implements Strategy {
         boolean illegalCardFlag = false;
         int[] freq = new int[Constants.CARD_ID_RANGE];
         Arrays.fill(freq, 0);
+
+        // Get frequency of cards
         for (Integer cardID : cardIDs) {
             ++freq[cardID];
             if (cardMap.getGoodsById(cardID).getType() == GoodsType.Illegal) {
@@ -37,9 +39,8 @@ public class Bribe implements Strategy {
                 freq[cardID] = 0;
             }
         }
-        /**
-         * Do Basic Strategy if there are no illegal cards
-         */
+
+        // Do Basic Strategy if there are no illegal cards
         if (!illegalCardFlag || p.getScore() <= Constants.BRIBE_MINIMUM_RISK) {
             BasicCardComparator basicCardComparator = new BasicCardComparator();
             Collections.sort(cardsDrawn, basicCardComparator);
@@ -58,16 +59,17 @@ public class Bribe implements Strategy {
             p.setBribe(0);
             return ans;
         }
-        /**
-         * Do Bribe Strategy
-         */
+
+        // Do Bribe Strategy
         Collections.sort(cardsDrawn, bribeCardComparator);
 
+        // Add cards to the bag according to Bribe strategy
         int cardIndex = 0;
-        int potentialScore = score;
+        int potentialScore = p.getScore();
         int nrIllegalCards = 0;
         while (ans.size() < Constants.MAX_GOODS_ALLOWED && cardIndex < cardsDrawn.size()) {
             Goods potentialAsset = cardsDrawn.get(cardIndex).getAsset();
+            // Add card to the bag if player enough score to pay penalty
             if (potentialAsset.getPenalty() < potentialScore) {
                 ans.add(potentialAsset);
                 potentialScore -= potentialAsset.getPenalty();
@@ -83,6 +85,7 @@ public class Bribe implements Strategy {
                 ++cardIndex;
             }
         }
+        // Set Player's bribe
         if (nrIllegalCards == 0) {
             p.setBribe(0);
         } else if (nrIllegalCards <= Constants.LOW_BRIBE_NUMBER) {
@@ -104,7 +107,6 @@ public class Bribe implements Strategy {
                       final int playerNumber, final int sheriffScore) {
         int scoreNegative = 0;
         int scorePositive = 0;
-        // List<Integer> deck = GameInput.getAssetIds();
         List<Goods> playerAssets = p.getAssets();
         List<Goods> playerAssetsBrought = p.getAssetsBrought();
 
@@ -119,7 +121,6 @@ public class Bribe implements Strategy {
         if (sheriffRightID == playerNumber) {
             sheriffRightID = 0;
         }
-        // System.out.println(sheriffID + " " + sheriffScore);
         if ((p.getID() == sheriffLeftID || p.getID() == sheriffRightID)
                 && sheriffScore >= Constants.BRIBE_MINIMUM_SCORE) {
             // Search a player unless he gives bribe
@@ -128,13 +129,10 @@ public class Bribe implements Strategy {
                 if (asset.getType() == GoodsType.Illegal
                         || asset.getId() != p.getAssetDeclared().getId()) {
                     scoreNegative += asset.getPenalty();
-                    // Confiscation
-                    // playerAssets.remove(assetIndex);
 
                     if (playerAssets.isEmpty()) {
                         break;
                     }
-                    // deck.add(assets.getId());
                 } else {
                     scorePositive += asset.getPenalty();
                     playerAssetsBrought.add(asset);

@@ -46,8 +46,14 @@ public class Player {
     final Strategy getStrategy() {
         return gameAproach;
     }
+
+    /**
+     * Set Player's cards in the bag.
+     * @param cardIDs : Player's cards in hand
+     * @param roundID : ID of the current round
+     */
     public final void setCards(final List<Integer> cardIDs, final int roundID) {
-        assets = gameAproach.createBag(cardIDs, roundID, score, this);
+        assets = gameAproach.createBag(cardIDs, roundID, this);
         assetDeclared = gameAproach.declareAsset(assets);
     }
     public final Goods getAssetDeclared() {
@@ -76,6 +82,8 @@ public class Player {
         int searchScore = gameAproach.search(p, id, playerNumber, score);
         roundScore += searchScore;
     }
+
+    // Add bonus legal goods for each illegal asset and update Player' score
     final void finalScore() {
         List<Goods> bonus = new ArrayList<>();
         for (Goods asset : assetsBrought) {
@@ -86,7 +94,9 @@ public class Player {
                 for (Goods assetBonus : illegalBonus.keySet()) {
                     int bonusGoodSize = illegalBonus.get(assetBonus);
                     for (int i = 0; i < bonusGoodSize; ++i) {
+                        // Add legal goods to the bag
                         bonus.add(assetBonus);
+                        // Add the score for legal goods
                         score += assetBonus.getProfit();
                     }
                 }
